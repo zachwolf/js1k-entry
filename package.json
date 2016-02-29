@@ -4,7 +4,8 @@
   "description": "entry for js1k2016",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "npm test",
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -24,6 +25,7 @@
   "homepage": "https://github.com/zachwolf/js1k-entry#readme",
   "devDependencies": {
     "expect.js": "^0.3.1",
+    "express": "^4.13.4",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
     "sinon-expect": "^0.2.0"
