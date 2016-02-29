@@ -1,0 +1,25 @@
+{
+  "name": "js1k",
+  "version": "1.0.0",
+  "description": "entry for js1k2016",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zachwolf/js1k-entry.git"
+  },
+  "keywords": [
+    "js1k",
+    "drawing",
+    "machine",
+    "canvas"
+  ],
+  "author": "Zach Wolf",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zachwolf/js1k-entry/issues"
+  },
+  "homepage": "https://github.com/zachwolf/js1k-entry#readme"
+}
