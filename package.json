@@ -4,7 +4,8 @@
   "description": "entry for js1k2016",
   "main": "index.js",
   "scripts": {
-    "test": "npm test",
+    "test": "find ./tests -name '*Spec.js' | xargs mocha -R spec",
+    "test:watch": "npm run test -- -w",
     "start": "nodemon server.js"
   },
   "repository": {
