@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>js1k drawing machine</title>
+	<style type="text/css">
+	html, body {
+		padding: 0;
+		margin: 0;
+		height: 100%;
+		width: 100%;
+	}
+	</style>
+</head>
+<body>
+
+<canvas id="stage"></canvas>
+
+<script type="text/javascript">
+	(function(w){
+		var canvas = document.querySelector('#stage')
+			, context = canvas.getContext('2d')
+
+		canvas.width = document.body.clientWidth
+		canvas.height = document.body.clientHeight
+
+		w.d = document
+		w.b = document.body
+		w.a = canvas
+		w.c = context
+	}(window))
+</script>
+<script src="/machine.js"></script>
+
+</body>
+</html>
