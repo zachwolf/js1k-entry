@@ -230,13 +230,17 @@ describe('Rotor', function () {
 		})
 
 		it('should calculate distance based on passed speed', function () {
+			function round (num) {
+				return Math.round(num * 100) / 100
+			}
+
 			var rotorA = new Rotor(0, 0, 0, 1000)
 				, rotorB = new Rotor(0, 0, 0, 2000)
 
 			rotorA.transform()
 			rotorB.transform()
 
-			expect(rotorA.rotation).to.equal(rotorB.rotation / 2)
+			expect(round(rotorB.rotation)).to.equal(round(rotorA.rotation) / 2)
 		})
 	})
 })
