@@ -1,5 +1,15 @@
 var noop = function () {}
 
+function getFPS (cb) {
+  // todo: make actual frame rate checker
+  // previous time - this time = frame rate
+  // one second / frame rate = frames per second
+  return cb(60)
+}
+
+
+
+
 function Machine () {
   this.initialize.apply(this, arguments)
 }
@@ -80,6 +90,10 @@ Machine.prototype.increment = function () {
   return this
 }
 
+
+
+
+
 /**
  * A spinning object in space
  * @constructor
@@ -117,12 +131,6 @@ Rotor.prototype.draw = function (cntx) {
     .stroke()
 }
 
-function getFPS (cb) {
-  // previous time - this time = frame rate
-  // one second / frame rate = frames per second
-  return cb(60)
-}
-
 Rotor.prototype.transform = function() {
   // calculate distance of circle based on passed speed
   // 
@@ -139,10 +147,25 @@ Rotor.prototype.transform = function() {
   return this
 }
 
+
+
+
+/**
+ * Pivots serve as a single moving point on a Rotor
+ * @constructor
+ */
 function Pivot () {
   this.initialize.apply(this, arguments)
 }
 
+/**
+ * set up class - save reference to passed values
+ * 
+ * @param  {Rotor} rotor      rotor this pivot instance lives on
+ * @param  {Number} radians    starting offset (range 0 to 2PI)
+ * @param  {Number} fromCenter distance from the center of the rotor
+ * @return {Pivot}            self reference
+ */
 Pivot.prototype.initialize = function(rotor, radians, fromCenter) {
   this.rotor = rotor
   this.radians = radians
@@ -163,6 +186,71 @@ Pivot.prototype.draw = function(cntx) {
 
   return this
 }
+
+
+
+
+/**
+ * An Arm is used to find a point in space between
+ * it's pivotand it's length
+ * 
+ * @constructor
+ */
+function Arm() {
+  this.initialize.apply(this, arguments)
+}
+
+/**
+ * class setup - saves passed parameters
+ * @param  {Pivot} pivot - point to move from
+ * @return {Arm}       self reference
+ */
+Arm.prototype.initialize = function (pivot) {
+  this.pivot = pivot
+
+  return this
+}
+
+Arm.prototype.draw = function (cntx) {
+  cntx
+    .beginPath()
+    .moveTo(500, 500)
+    .lineTo(505, 505)
+    .closePath()
+    .stroke()
+
+  return this
+}
+
+Arm.prototype.transform = function () {
+
+}
+
+
+
+/**
+ * ArmManagers serves as a way to have multiple separate arms
+ * that don't have to be aware of eachother
+ *
+ * @constructor
+ */
+function ArmManager () {
+  this.initialize.apply(this, arguments)
+}
+
+/**
+ * class setup - save passed params
+ * @param  {Arm} armA refernce to an Arm
+ * @param  {Arm} armB reference to a second Arm
+ * @return {ArmManager}      self reference
+ */
+ArmManager.prototype.initialize = function (armA, armB) {
+
+}
+
+ArmManager.prototype.increment = function () {}
+
+
 
 /**
  * Converts an object's methods to chainable calls
@@ -203,7 +291,9 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
     Machine: Machine,
     Rotor: Rotor,
     Chain: Chain,
-    Pivot: Pivot
+    Pivot: Pivot,
+    Arm: Arm,
+    ArmManager: ArmManager
   }
 } else {
   // app setup for browser
@@ -219,7 +309,7 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
     machine
       .increment()
       .draw()
-    requestAnimationFrame(draw)
+    // requestAnimationFrame(draw)
   }
 
   requestAnimationFrame(draw)

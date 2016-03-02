@@ -1,13 +1,15 @@
-var expect  = require('expect.js')
-	, sinon   = require('sinon')
-	, sExpect = require('sinon-expect').enhance(expect, sinon, 'was')
-	, imports = require('../src/machine')
-	, Chain   = imports.Chain
-	, Machine = imports.Machine
-	, Rotor   = imports.Rotor
-	, Pivot   = imports.Pivot
+var expect     = require('expect.js')
+	, sinon      = require('sinon')
+	, sExpect    = require('sinon-expect').enhance(expect, sinon, 'was')
+	, imports    = require('../src/machine')
+	, Chain      = imports.Chain
+	, Machine    = imports.Machine
+	, Rotor      = imports.Rotor
+	, Pivot      = imports.Pivot
+	, Arm        = imports.Arm
+	, ArmManager = imports.ArmManager
 
-	, noop    = function () {}
+	, noop        = function () {}
 	, contextStub = new Chain({
 			arc: noop,
 			rect: noop,
@@ -15,6 +17,7 @@ var expect  = require('expect.js')
 			beginPath: noop,
 			closePath: noop,
 			moveTo: noop,
+			lineTo: noop,
 			stroke: noop
 		})
 
@@ -246,14 +249,86 @@ describe('Rotor', function () {
 })
 
 describe('Pivot', function () {
-	xdescribe('#initialize', function () {
-		xit('should do?')
+	describe('#initialize', function () {
+		it('should save passed values', function () {
+			var rotor = 1
+				, radians = 2
+				, fromCenter = 3
+				, pivot = new Pivot(rotor, radians, fromCenter)
+
+			expect(pivot.rotor).to.equal(rotor)
+			expect(pivot.radians).to.equal(radians)
+			expect(pivot.fromCenter).to.equal(fromCenter)
+		})
 	})
 
-	xdescribe('#draw', function () {
+	describe('#draw', function () {
 		it('should draw the rotated pivot point', function () {
-			
+			var rotor = {
+						x: 100,
+						y: 100,
+						rotation: 0
+					}
+				, arcSpy = sinon.spy(contextStub, 'arc')
+				, pivot = new Pivot(rotor, 0, 0)
+
+			pivot.draw(contextStub)
+
+			sExpect(arcSpy).was.called()
+
+			contextStub.arc.restore()
 		})
+	})
+})
+
+describe('Arm', function () {
+	describe('#initialize', function () {
+		it('should save passed parameters', function () {
+			var pivot = '(pivot)'
+				, arm = new Arm(pivot)
+
+			expect(arm.pivot).to.equal(pivot)
+		})
+	})
+
+	describe('#draw', function () {
+		it('should draw the arm to the stage', function () {
+			var moveToSpy = sinon.spy(contextStub, 'moveTo')
+				, lineToSpy = sinon.spy(contextStub, 'lineTo')
+				, rotor = {
+						// ...
+					}
+				, pivot = {
+						// ...
+					}
+				, arm = new Arm()
+
+			arm.draw(contextStub)
+
+			sExpect(moveToSpy).was.called()
+			sExpect(lineToSpy).was.called()
+
+			contextStub.moveTo.restore()
+			contextStub.lineTo.restore()
+		})
+
+		it('should return an instance of itsself', function () {
+			var arm = new Arm()
+
+			expect(arm.draw(contextStub) instanceof Arm).to.be(true)
+		})
+	})
+
+	xdescribe('#transform', function () {})
+})
+
+describe('ArmManager', function () {
+	describe('#initialize', function () {
+		xit('should....')
+	})
+
+	describe('#increment', function () {
+		xit('should....')
 	})
 })
 
