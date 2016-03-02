@@ -5,6 +5,7 @@ var expect  = require('expect.js')
 	, Chain   = imports.Chain
 	, Machine = imports.Machine
 	, Rotor   = imports.Rotor
+	, Pivot   = imports.Pivot
 
 	, noop    = function () {}
 	, contextStub = new Chain({
@@ -119,15 +120,22 @@ describe('Machine', function () {
 	describe('#draw', function () {
 		var machine
 			, rotorDrawSpy
+			, pivotDrawSpy
 
 		beforeEach(function () {
 			rotorDrawSpy = sinon.spy(Rotor.prototype, 'draw')
+			pivotDrawSpy = sinon.spy(Pivot.prototype, 'draw')
+
 			machine = new Machine(contextStub)
 		})
 
 		afterEach(function() {
 			Rotor.prototype.draw.restore()
 			rotorDrawSpy = null
+
+			Pivot.prototype.draw.restore()
+			pivotDrawSpy = null
+
 			machine = null
 		})
 
@@ -135,6 +143,23 @@ describe('Machine', function () {
 			machine.draw(contextStub)
 
 			sExpect(rotorDrawSpy).was.calledTwice()
+		})
+
+		it('should call draw on all pivots', function () {
+			machine.draw(contextStub)
+
+			sExpect(pivotDrawSpy).was.calledTwice()
+		})
+	})
+
+	describe('#increment', function() {
+		it('should call transform on all rotors', function () {
+			var machine = new Machine(contextStub)
+				, spy = sinon.spy(Rotor.prototype, 'transform')
+
+			machine.increment()
+
+			sExpect(spy).was.calledTwice()
 		})
 	})
 
@@ -170,7 +195,7 @@ describe('Rotor', function () {
 
 			expect(rotor.x).to.equal(config.x)
 			expect(rotor.y).to.equal(config.y)
-			expect(rotor.r).to.equal(config.r)
+			expect(rotor.radius).to.equal(config.r)
 		})
 
 		it('should return itsself', function () {
@@ -191,6 +216,39 @@ describe('Rotor', function () {
 			sExpect(spy).was.calledWith(1, 2, 3, 0, Math.PI * 2)
 
 			contextStub.arc.restore()
+		})
+	})
+
+	describe('#transform', function () {
+		it('should increment the rotors rotation', function () {
+			var rotor = new Rotor(0, 0, 0, 100)
+				, rotorVal = rotor.rotation
+
+			rotor.transform()
+
+			expect(rotorVal).to.not.equal(rotor.rotation)
+		})
+
+		it('should calculate distance based on passed speed', function () {
+			var rotorA = new Rotor(0, 0, 0, 1000)
+				, rotorB = new Rotor(0, 0, 0, 2000)
+
+			rotorA.transform()
+			rotorB.transform()
+
+			expect(rotorA.rotation).to.equal(rotorB.rotation / 2)
+		})
+	})
+})
+
+describe('Pivot', function () {
+	xdescribe('#initialize', function () {
+		xit('should do?')
+	})
+
+	xdescribe('#draw', function () {
+		it('should draw the rotated pivot point', function () {
+			
 		})
 	})
 })

@@ -14,10 +14,12 @@ Machine.prototype.initialize = function(cntx) {
   this.cntx = cntx
 
   this.rotorA = new Rotor(100, 100, 50, 1000)
-  this.rotorB = new Rotor(400, 300, 100, 3000)
+  // this.rotorB = new Rotor(400, 300, 100, 3000)
+  this.rotorB = new Rotor(100, 100, 100, 2000)
 
-  // this.pivotA = new Pivot(this.rotarA, 0, 40) // rotar, start degrees, offset from center
-  // this.pivotb = new Pivot(this.rotarB, 30, 75) // rotar, start degrees, offset from center
+  this.pivotA = new Pivot(this.rotorA, 0, 40) // rotar, start degrees, offset from center
+  // this.pivotB = new Pivot(this.rotorB, (Math.PI * 2) * .5, 75) // rotar, start degrees, offset from center
+  this.pivotB = new Pivot(this.rotorB, 0, 40) // rotar, start degrees, offset from center
 
   // this.armA = new Arm(this.pivotA, length)
   // this.armb = new Arm(this.pivotB, length)
@@ -52,12 +54,28 @@ Machine.prototype.sequential = function (numList) {
   return state
 }
 
+/**
+ * Loops through machine pieces and tells them what to draw
+ * 
+ * @return {Machine} 
+ */
 Machine.prototype.draw = function() {
   this.cntx
     .set('strokeStyle', '#000')
 
   this.rotorA.draw(this.cntx)
   this.rotorB.draw(this.cntx)
+
+  this.pivotA.draw(this.cntx)
+  this.pivotB.draw(this.cntx)
+
+  return this
+}
+
+Machine.prototype.increment = function () {
+
+  this.rotorA.transform()
+  this.rotorB.transform()
 
   return this
 }
@@ -76,13 +94,16 @@ function Rotor () {
  * @param  {Number} x - x axis position
  * @param  {Number} y - y axis position
  * @param  {Number} r - rotor radius
+ * @param  {Number} s - rotation speed
  * @return {Rotor}    - self reference
  */
 Rotor.prototype.initialize = function (x, y, r, s) {
   this.x = x
   this.y = y
-  this.r = r
-  this.s = s
+  this.radius = r
+  this.speed = s
+  this.rotation = 0
+
   return this
 }
 
@@ -90,10 +111,57 @@ Rotor.prototype.draw = function (cntx) {
   cntx
     .beginPath()
     .arc(this.x, this.y, 2, 0, Math.PI * 2)
-    .moveTo(this.x + this.r, this.y)
-    .arc(this.x, this.y, this.r, 0, Math.PI * 2)
+    .moveTo(this.x + this.radius, this.y)
+    .arc(this.x, this.y, this.radius, 0, Math.PI * 2)
     .closePath()
     .stroke()
+}
+
+function getFPS (cb) {
+  // previous time - this time = frame rate
+  // one second / frame rate = frames per second
+  return cb(60)
+}
+
+Rotor.prototype.transform = function() {
+  // calculate distance of circle based on passed speed
+  // 
+  // frames per second / 2PI = rotation distance per frame
+  // this.speed / 1000ms = rotations per second
+  // this.rotation = this.rotation + rotation distance per frame / rotations per second
+
+  var oneRPS = getFPS(function (fps) {
+        return Math.PI * 2 / fps
+      })
+    , increment = oneRPS / (this.speed / 1000)
+
+  this.rotation = this.rotation + increment
+  return this
+}
+
+function Pivot () {
+  this.initialize.apply(this, arguments)
+}
+
+Pivot.prototype.initialize = function(rotor, radians, fromCenter) {
+  this.rotor = rotor
+  this.radians = radians
+  this.fromCenter = fromCenter
+
+  return this
+}
+
+Pivot.prototype.draw = function(cntx) {
+  var x = this.rotor.x + this.fromCenter * Math.cos(this.rotor.rotation + this.radians)
+    , y = this.rotor.y + this.fromCenter * Math.sin(this.rotor.rotation + this.radians)
+
+  cntx
+    .beginPath()
+    .arc(x, y, 5, 0, Math.PI * 2)
+    .closePath()
+    .stroke()
+
+  return this
 }
 
 /**
@@ -134,7 +202,8 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
   module.exports = {
     Machine: Machine,
     Rotor: Rotor,
-    Chain: Chain
+    Chain: Chain,
+    Pivot: Pivot
   }
 } else {
   // app setup for browser
@@ -147,7 +216,9 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
       .rect(0, 0, a.clientWidth, a.clientHeight)
       .fill()
 
-    machine.draw()
+    machine
+      .increment()
+      .draw()
     requestAnimationFrame(draw)
   }
 
