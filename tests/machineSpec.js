@@ -85,6 +85,24 @@ describe('Machine', function () {
 
 			Rotor.prototype.initialize.restore()
 		})
+
+		it('should create two arms', function () {
+			var spy = sinon.spy(Arm.prototype, 'initialize')
+			var machine = new Machine()
+
+			sExpect(spy).was.calledTwice()
+
+			Arm.prototype.initialize.restore()
+		})
+
+		it('should create an ArmManager', function () {
+			var spy = sinon.spy(ArmManager.prototype, 'initialize')
+				, machine = new Machine()
+
+			sExpect(spy).was.calledOnce()
+
+			ArmManager.prototype.initialize.restore()
+		})
 	})
 
 	describe('#sequential', function () {
@@ -163,6 +181,19 @@ describe('Machine', function () {
 			machine.increment()
 
 			sExpect(spy).was.calledTwice()
+
+			Rotor.prototype.transform.restore()
+		})
+
+		it('should call updateAll on ArmManager', function () {
+			var machine = new Machine(contextStub)
+				, spy = sinon.spy(ArmManager.prototype, 'updateAll')
+
+			machine.increment()
+
+			sExpect(spy).was.calledOnce()
+
+			ArmManager.prototype.updateAll.restore()
 		})
 	})
 
@@ -289,6 +320,12 @@ describe('Arm', function () {
 
 			expect(arm.pivot).to.equal(pivot)
 		})
+
+		it('should set an initial length', function () {
+			var arm = new Arm({})
+
+			expect(arm.length).to.not.be(undefined)
+		})
 	})
 
 	describe('#draw', function () {
@@ -319,16 +356,147 @@ describe('Arm', function () {
 		})
 	})
 
-	xdescribe('#transform', function () {})
+	describe('#transform', function () {
+		it('should save new angle', function () {
+			var arm = new Arm({})
+			var angle = arm.angle
+
+			arm.transform(1)
+
+			expect(arm.angle).to.not.equal(angle)
+		})
+
+		it('should return itsself', function () {
+			var arm = new Arm({})
+
+			expect(arm.transform() instanceof Arm).to.be(true)
+		})
+	})
 })
 
 describe('ArmManager', function () {
+	var armStub = {
+		transform: noop
+	}
+
 	describe('#initialize', function () {
-		xit('should....')
+		it('should save passed parameters', function () {
+			var armA = Object.assign({}, armStub)
+				, armB = Object.assign({}, armStub)
+				, manager = new ArmManager(armA, armB)
+
+			expect(manager.armA).to.equal(armA)
+			expect(manager.armB).to.equal(armB)
+			expect(manager.armB).to.not.equal(armA)
+		})
+
+		it('should call updateAll', function () {
+			var spy = sinon.spy(ArmManager.prototype, 'updateAll')
+			var manager = new ArmManager(armStub, armStub)
+
+			sExpect(spy).was.calledOnce()
+		})
 	})
 
-	describe('#increment', function () {
-		xit('should....')
+	describe('#updateAll', function () {
+		it('should set the arm angles', function () {
+			var angleA = null
+				, armA = Object.assign({}, armStub)
+				, angleB = null
+				, armB = Object.assign({}, armStub)
+				, manager = new ArmManager(armA, armB)
+
+			angleA = manager.armA.angle
+			angleB = manager.armB.angle
+
+			manager.updateAll()
+
+			expect(manager.armA.angle).to.not.equal(angleA)
+			expect(manager.armB.angle).to.not.equal(angleB)
+		})
+
+		it('should call transform on all arms', function () {
+			var spy = sinon.spy(Arm.prototype, 'transform')
+
+			ArmManager.prototype.updateAll.call({
+				armA: new Arm(),
+				armB: new Arm()
+			})
+
+			sExpect(spy).was.calledTwice()
+		})
+
+		it('should return itsself', function () {
+			var manager = new ArmManager(armStub, armStub)
+
+			expect(manager.updateAll() instanceof ArmManager).to.be(true)
+		})
+	})
+
+	describe('#getIntersects', function () {
+		it('should return an array if there are intersecting points', function () {
+			var armA = Object.assign({
+						length: 200,
+						pivot: {
+							x: 0,
+							y: 0
+						}
+					}, armStub)
+				, armB = Object.assign({
+						length: 200,
+						pivot: {
+							x: 100,
+							y: 0
+						}
+					}, armStub)
+				, manager = new ArmManager(armA, armB)
+				, points = manager.getIntersects()
+
+			expect(points).to.be.an(Array)
+		})
+
+		it('should return false if there are no intersecting points', function () {
+			var armA = Object.assign({
+						length: 200,
+						pivot: {
+							x: 0,
+							y: 0
+						}
+					}, armStub)
+				, armB = Object.assign({
+						length: 200,
+						pivot: {
+							x: 600,
+							y: 0
+						}
+					}, armStub)
+				, manager = new ArmManager(armA, armB)
+				, points = manager.getIntersects()
+
+			expect(points).to.be(false)
+		})
+
+		it('should find correct intersecting points', function () {
+			var armA = Object.assign({
+						length: 200,
+						pivot: {
+							x: 0,
+							y: 0
+						}
+					}, armStub)
+				, armB = Object.assign({
+						length: 200,
+						pivot: {
+							x: 400,
+							y: 0
+						}
+					}, armStub)
+				, manager = new ArmManager(armA, armB)
+				, points = manager.getIntersects()
+
+			expect(points).to.eql([[200, 0], [200, 0]])
+		})
+
 	})
 })
 
