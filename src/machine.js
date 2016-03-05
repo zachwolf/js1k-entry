@@ -30,7 +30,7 @@ Machine.prototype.initialize = function(cntx) {
   // rotors
   this.rotorA = new Rotor(100, 100, 50, 1000)
   // this.rotorB = new Rotor(400, 300, 100, 3000)
-  this.rotorB = new Rotor(100, 100, 100, 2000)
+  this.rotorB = new Rotor(200, 100, 100, 2000)
 
   // pivots
   this.pivotA = new Pivot(this.rotorA, 0, 40) // rotar, start degrees, offset from center
@@ -88,6 +88,8 @@ Machine.prototype.draw = function() {
   this.pivotA.draw(this.cntx)
   this.pivotB.draw(this.cntx)
 
+  this.armManager.draw(this.cntx)
+
   return this
 }
 
@@ -95,6 +97,9 @@ Machine.prototype.increment = function () {
 
   this.rotorA.transform()
   this.rotorB.transform()
+
+  this.pivotA.transform()
+  this.pivotB.transform()
 
   this.armManager.updateAll()
 
@@ -186,14 +191,18 @@ Pivot.prototype.initialize = function(rotor, radians, fromCenter) {
 }
 
 Pivot.prototype.draw = function(cntx) {
-  var x = this.rotor.x + this.fromCenter * Math.cos(this.rotor.rotation + this.radians)
-    , y = this.rotor.y + this.fromCenter * Math.sin(this.rotor.rotation + this.radians)
-
   cntx
     .beginPath()
-    .arc(x, y, 5, 0, Math.PI * 2)
+    .arc(this.x, this.y, 5, 0, Math.PI * 2)
     .closePath()
     .stroke()
+
+  return this
+}
+
+Pivot.prototype.transform = function () {
+  this.x = this.rotor.x + this.fromCenter * Math.cos(this.rotor.rotation + this.radians)
+  this.y = this.rotor.y + this.fromCenter * Math.sin(this.rotor.rotation + this.radians)
 
   return this
 }
@@ -226,17 +235,24 @@ Arm.prototype.initialize = function (pivot) {
 
 Arm.prototype.draw = function (cntx) {
   cntx
+    .set('strokeStyle', '#BEEFED')
     .beginPath()
-    .moveTo(500, 500)
-    .lineTo(505, 505)
+    .moveTo(this.pivot.x, this.pivot.y)
+    .lineTo(this.x, this.y)
+    .closePath()
+    .stroke()
+    .set('strokeStyle', '#BEFA11')
+    .beginPath()
+    .arc(this.pivot.x, this.pivot.y, this.length, 0, Math.PI * 2)
     .closePath()
     .stroke()
 
   return this
 }
 
-Arm.prototype.transform = function (angle) {
-  this.angle = angle
+Arm.prototype.transform = function () {
+  this.x = this.pivot.x + this.length * Math.cos(this.angle)
+  this.y = this.pivot.y + this.length * Math.sin(this.angle)
 
   return this
 }
@@ -269,6 +285,11 @@ ArmManager.prototype.initialize = function (armA, armB) {
   return this
 }
 
+/**
+ * Calculates if the arms have a common possible location
+ * 
+ * @return {Boolean|Array} - false if no common points, array of two [x, y] points if possible
+ */
 ArmManager.prototype.getIntersects = function () {
   var r0 = this.armA.length
     , x0 = this.armA.pivot.x
@@ -314,20 +335,37 @@ ArmManager.prototype.getIntersects = function () {
   }
 }
 
+function getAngle (startPoint, endPoint) {
+  return Math.random()
+}
+
 ArmManager.prototype.updateAll = function () {
   // to find intersecting points...
-  // arm radius
+  var points = this.getIntersects()
 
-  // 
-  this.armA.angle = Math.random()
-  this.armB.angle = Math.random()
+  // todo: find actual point on the canvas
+  if (points) {
+    console.log(points)
+    var point = points[1]
 
-  this.armA.transform()
-  this.armB.transform()
+    this.armA.angle = getAngle([this.armA.x, this.armA.y], point)
+    this.armB.angle = getAngle([this.armB.x, this.armB.y], point)
+
+    this.armA.transform()
+    this.armB.transform()
+  } else {
+    console.log('no possible points with current settings')
+  }
 
   return this
 }
 
+ArmManager.prototype.draw = function (cntx) {
+  this.armA.draw(cntx)
+  this.armB.draw(cntx)
+
+  return this
+}
 
 
 /**
@@ -378,7 +416,13 @@ if (typeof module !== 'undefined' && module.hasOwnProperty('exports')) {
   var machine = new Machine(new Chain(window.c))
   window.machine = machine
 
+  var limit = 10
+
   function draw() {
+    // if (!limit--) {
+    //   return
+    // }
+
     machine.cntx
       .set('fillStyle', '#fff')
       .rect(0, 0, a.clientWidth, a.clientHeight)

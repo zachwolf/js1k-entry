@@ -140,43 +140,59 @@ describe('Machine', function () {
 
 	describe('#draw', function () {
 		var machine
-			, rotorDrawSpy
-			, pivotDrawSpy
 
 		beforeEach(function () {
-			rotorDrawSpy = sinon.spy(Rotor.prototype, 'draw')
-			pivotDrawSpy = sinon.spy(Pivot.prototype, 'draw')
-
 			machine = new Machine(contextStub)
 		})
 
 		afterEach(function() {
-			Rotor.prototype.draw.restore()
-			rotorDrawSpy = null
-
-			Pivot.prototype.draw.restore()
-			pivotDrawSpy = null
-
 			machine = null
 		})
 
 		it('should call draw on all rotors', function () {
+			var rotorDrawSpy = sinon.spy(Rotor.prototype, 'draw')
+
 			machine.draw(contextStub)
 
 			sExpect(rotorDrawSpy).was.calledTwice()
+
+			Rotor.prototype.draw.restore()
 		})
 
 		it('should call draw on all pivots', function () {
+			var pivotDrawSpy = sinon.spy(Pivot.prototype, 'draw')
+
 			machine.draw(contextStub)
 
 			sExpect(pivotDrawSpy).was.calledTwice()
+
+			Pivot.prototype.draw.restore()
+		})
+
+		it('should call draw on ArmManager', function () {
+			var managerDrawSpy = sinon.spy(ArmManager.prototype, 'draw')
+
+			machine.draw()
+
+			sExpect(managerDrawSpy).was.calledOnce()
+
+			ArmManager.prototype.draw.restore()
 		})
 	})
 
 	describe('#increment', function() {
+		var machine
+
+		beforeEach(function () {
+			machine = new Machine(contextStub)
+		})
+
+		afterEach(function () {
+			machine = null
+		})
+
 		it('should call transform on all rotors', function () {
-			var machine = new Machine(contextStub)
-				, spy = sinon.spy(Rotor.prototype, 'transform')
+			var spy = sinon.spy(Rotor.prototype, 'transform')
 
 			machine.increment()
 
@@ -185,9 +201,18 @@ describe('Machine', function () {
 			Rotor.prototype.transform.restore()
 		})
 
+		it('should call transform on all pivots', function () {
+			var spy = sinon.spy(Pivot.prototype, 'transform')
+
+			machine.increment()
+
+			sExpect(spy).was.calledTwice()
+
+			Pivot.prototype.transform.restore()
+		})
+
 		it('should call updateAll on ArmManager', function () {
-			var machine = new Machine(contextStub)
-				, spy = sinon.spy(ArmManager.prototype, 'updateAll')
+			var spy = sinon.spy(ArmManager.prototype, 'updateAll')
 
 			machine.increment()
 
@@ -310,6 +335,36 @@ describe('Pivot', function () {
 			contextStub.arc.restore()
 		})
 	})
+
+	describe('transform', function () {
+		var pivot
+
+		beforeEach(function () {
+			pivot = new Pivot({
+				x: 0,
+				y: 0,
+				rotation: 0
+			})
+		})
+
+		afterEach(function () {
+			pivot = null
+		})
+
+		it('should update the x and y properties', function () {
+			var x = pivot.x
+				, y = pivot.y
+
+			pivot.transform()
+
+			expect(x).to.not.equal(pivot.x)
+			expect(y).to.not.equal(pivot.y)
+		})
+
+		it('should return itsself', function () {
+			expect(pivot.transform()).to.be.a(Pivot)
+		})
+	})
 })
 
 describe('Arm', function () {
@@ -380,6 +435,16 @@ describe('ArmManager', function () {
 	}
 
 	describe('#initialize', function () {
+		before(function () {
+			sinon.stub(ArmManager.prototype, 'getIntersects', function () {
+				return [[0, 0], [0, 0]]
+			})
+		})
+
+		after(function () {
+			ArmManager.prototype.getIntersects.restore()
+		})
+		
 		it('should save passed parameters', function () {
 			var armA = Object.assign({}, armStub)
 				, armB = Object.assign({}, armStub)
@@ -399,11 +464,31 @@ describe('ArmManager', function () {
 	})
 
 	describe('#updateAll', function () {
+		beforeEach(function () {
+			sinon.stub(ArmManager.prototype, 'getIntersects', function () {
+				return [[0, 0], [100, 100]]
+			})
+		})
+
+		afterEach(function () {
+			ArmManager.prototype.getIntersects.restore()
+		})
+
 		it('should set the arm angles', function () {
 			var angleA = null
-				, armA = Object.assign({}, armStub)
+				, armA = Object.assign({
+						pivot: {
+							x: 0,
+							y: 0
+						}
+					}, armStub)
 				, angleB = null
-				, armB = Object.assign({}, armStub)
+				, armB = Object.assign({
+						pivot: {
+							x: 50,
+							y: 50
+						}
+					}, armStub)
 				, manager = new ArmManager(armA, armB)
 
 			angleA = manager.armA.angle
@@ -427,13 +512,32 @@ describe('ArmManager', function () {
 		})
 
 		it('should return itsself', function () {
-			var manager = new ArmManager(armStub, armStub)
+			var arm = Object.assign({
+						pivot: {
+							x: 0,
+							y: 0
+						}
+					}, armStub)
+				, manager = new ArmManager(arm, arm)
 
 			expect(manager.updateAll() instanceof ArmManager).to.be(true)
 		})
 	})
 
 	describe('#getIntersects', function () {
+		var armA = null
+			, armB = null
+
+		beforeEach(function () {
+			armA = '...'
+			armB = '...'
+		})
+
+		afterEach(function () {
+			armA = null
+			armB = null
+		})
+
 		it('should return an array if there are intersecting points', function () {
 			var armA = Object.assign({
 						length: 200,
@@ -496,7 +600,36 @@ describe('ArmManager', function () {
 
 			expect(points).to.eql([[200, 0], [200, 0]])
 		})
+	})
 
+	describe('draw', function () {
+		var manager
+			, armDrawSpy
+
+		before(function () {
+			var arm = new Arm({
+				x: 0,
+				y: 0
+			})
+
+			sinon.stub(ArmManager.prototype, 'getIntersects')
+			armDrawSpy = sinon.spy(Arm.prototype, 'draw')
+			manager = new ArmManager(arm, arm)
+		})
+
+		after(function () {
+			Arm.prototype.draw.restore()
+			ArmManager.prototype.getIntersects.restore()
+		})
+
+		it('should call draw on all managed arms', function () {
+			manager.draw(contextStub)
+			sExpect(armDrawSpy).was.calledTwice()
+		})
+
+		it('should return itsself', function () {
+			expect(manager.draw(contextStub) instanceof ArmManager).to.be(true)
+		})
 	})
 })
 
