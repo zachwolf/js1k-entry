@@ -1,3 +1,26 @@
+sinon  = require('sinon')
+expect = require('sinon-expect')
+              .enhance(require('expect.js'), sinon, 'was')
+
+shim   = require('./helpers/vanillaShim')
+
+describe 'Arm', () ->
+  Arm = null
+
+  before (done) ->
+    shim
+      path: '../src/js/Arm.js'
+      exports: 'Arm'
+    .then (shim) ->
+      Arm = shim
+      done()
+
+  describe '#initialize', ->
+    it 'should do something', ->
+      expect(true).to.be(true)
+
+
+###
 var sinon  = require('sinon')
 	, expect = require('sinon-expect')
 							.enhance(require('expect.js'), sinon, 'was')
@@ -81,3 +104,4 @@ describe('Arm', function () {
 		})
 	})
 })
+###

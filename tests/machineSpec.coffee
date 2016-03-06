@@ -1,3 +1,25 @@
+sinon  = require('sinon')
+expect = require('sinon-expect')
+              .enhance(require('expect.js'), sinon, 'was')
+
+shim   = require('./helpers/vanillaShim')
+
+describe 'Machine', () ->
+  Machine = null
+
+  before (done) ->
+    shim
+      path: '../src/js/Machine.js'
+      exports: 'Machine'
+    .then (shim) ->
+      Machine = shim
+      done()
+
+  describe '#initialize', ->
+    it 'should do something', ->
+      expect(true).to.be(true)
+
+###
 var expect     = require('expect.js')
 	, sinon      = require('sinon')
 	, sExpect    = require('sinon-expect').enhance(expect, sinon, 'was')
@@ -20,52 +42,6 @@ var expect     = require('expect.js')
 			lineTo: noop,
 			stroke: noop
 		})
-
-describe('Chain', function () {
-	describe('#initialize', function () {
-		it('should call original methods', function () {
-			var spy = sinon.spy(noop)
-				, obj = new Chain({
-						fn: spy
-					})
-
-			obj.fn()
-
-			sExpect(spy).was.called()
-		})
-
-		it('should return itsself', function () {
-			var obj = new Chain({
-				fn: noop,
-				foo: noop,
-				bar: noop
-			})
-
-			expect(obj.fn().foo().bar() instanceof Chain).to.be(true)
-		})
-	})
-
-	describe('#set', function () {
-		it('should update the original objects value', function () {
-			var obj = {
-						val: 'foo'
-					}
-				, chain = new Chain(obj)
-
-			chain.set('val', 'bar')
-
-			expect(obj.val).to.equal('bar')
-		})
-
-		it('should return itsself', function () {
-			var obj = new Chain({
-				val: 'foo'
-			})
-
-			expect(obj.set('val', 'bar') instanceof Chain).to.be(true)
-		})
-	})
-})
 
 describe('Machine', function () {
 
@@ -573,3 +549,4 @@ describe('ArmManager', function () {
 	})
 })
 
+###

@@ -4,15 +4,15 @@ expect = require('sinon-expect')
 
 shim   = require('./helpers/vanillaShim')
 
-describe 'ArmManager', () ->
-  ArmManager = null
+describe 'Rotor', () ->
+  Rotor = null
 
   before (done) ->
     shim
-      path: '../src/js/armManager.js'
-      exports: 'ArmManager'
+      path: '../src/js/Rotor.js'
+      exports: 'Rotor'
     .then (shim) ->
-      ArmManager = shim
+      Rotor = shim
       done()
 
   describe '#initialize', ->

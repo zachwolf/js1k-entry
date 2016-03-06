@@ -2,10 +2,13 @@ var Promise = require('bluebird')
 	, through = require('through2')
 	, path    = require('path')
 	, fs      = require('fs')
+	, caller  = require('caller')
 
 module.exports = function (options) {
+	var calledFrom = caller()
+
 	return new Promise(function (resolve) {
-		var stream = fs.createReadStream(path.join(__dirname, options.path))
+		var stream = fs.createReadStream(path.resolve(path.dirname(calledFrom), options.path))
 			, chunks = []
 
 		stream
@@ -22,6 +25,7 @@ module.exports = function (options) {
 
 		stream.on('error', function () {
 			console.error('error reading', options.path);
+			console.log('full path:', path.join(__dirname, options.path));
 		})
 	})
 }

@@ -4,15 +4,15 @@ expect = require('sinon-expect')
 
 shim   = require('./helpers/vanillaShim')
 
-describe 'ArmManager', () ->
-  ArmManager = null
+describe 'Pivot', () ->
+  Pivot = null
 
   before (done) ->
     shim
-      path: '../src/js/armManager.js'
-      exports: 'ArmManager'
+      path: '../src/js/Pivot.js'
+      exports: 'Pivot'
     .then (shim) ->
-      ArmManager = shim
+      Pivot = shim
       done()
 
   describe '#initialize', ->
