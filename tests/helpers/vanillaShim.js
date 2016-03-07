@@ -5,10 +5,10 @@ var Promise = require('bluebird')
 	, caller  = require('caller')
 
 module.exports = function (options) {
-	var calledFrom = caller()
+	var calledFrom = path.dirname(caller())
 
 	return new Promise(function (resolve) {
-		var stream = fs.createReadStream(path.resolve(path.dirname(calledFrom), options.path))
+		var stream = fs.createReadStream(path.resolve(calledFrom, options.path))
 			, chunks = []
 
 		stream
