@@ -40,7 +40,7 @@ describe 'Arm', () ->
     it 'should set an initial length', ->
       expect(arm.length).to.not.be(undefined)
 
-  describe '#draw', ->
+  xdescribe '#draw', ->
     it 'should draw the arm to the stage', ->
       arm.draw(contextStub)
 
@@ -50,7 +50,7 @@ describe 'Arm', () ->
     it 'should return an instance of itsself', ->
       expect(arm.draw(contextStub)).to.be.an Arm
 
-  describe '#transform', ->
+  xdescribe '#transform', ->
     it 'should save new angle', ->
       angle = arm.angle
 
