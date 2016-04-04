@@ -1,12 +1,12 @@
 var machine = new Machine(new Chain(window.c))
 window.machine = machine
 
-var limit = 10
+var limit = 5
 
 function draw() {
-  // if (!limit--) {
-  //   return
-  // }
+  if (!limit--) {
+    return
+  }
 
   machine.cntx
     .set('fillStyle', '#fff')

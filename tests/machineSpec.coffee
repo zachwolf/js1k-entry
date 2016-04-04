@@ -4,18 +4,11 @@ expect = require('sinon-expect')
 
 shim   = require('./helpers/vanillaShim')
 
-
 describe 'Machine', () ->
   Machine = null
-  machine = null
   context = null
 
   before (done) ->
-    global.Rotor = sinon.spy()
-
-    global.Pivot      = sinon.stub()
-    global.Arm        = sinon.stub()
-    global.ArmManager = sinon.stub()
     context = sinon.stub()
 
     shim
@@ -26,47 +19,129 @@ describe 'Machine', () ->
       done()
 
   describe '#initialize', ->
-    # beforeEach ->
+    beforeEach ->
+      global.Rotor      = sinon.spy()
+      global.Arm        = sinon.spy()
+      global.ArmManager = sinon.spy()
+      global.Pivot      = sinon.spy()
+
+    afterEach ->
+      global.Rotor      = sinon.spy()
+      global.Arm        = sinon.spy()
+      global.ArmManager = sinon.spy()
+      global.Pivot      = sinon.spy()
+
       # machine = new Machine stub
       # machine = new Machine
 
     it 'should be called immediately', ->
       sinon.spy(Machine.prototype, 'initialize')
-
       machine = new Machine
-
       expect(machine.initialize).was.calledOnce()
 
+    it 'should save passed context', ->
+      context = Symbol
+      machine = new Machine context
+      expect(machine.cntx).to.equal context
+
     it 'should create two rotors', ->
+      machine = new Machine
       expect(global.Rotor.calledWithNew()).to.be true
 
-    xit 'should create two arms', ->
+    it 'should create two pivots', ->
+      machine = new Machine
+      expect(global.Pivot.calledTwice).to.be true
+      expect(global.Pivot.calledWithNew()).to.be true
 
-    xit 'should create an ArmManager', ->
+    it 'should create two arms', ->
+      machine = new Machine
+      expect(global.Arm.calledTwice).to.be true
+      expect(global.Arm.calledWithNew()).to.be true
 
-  xdescribe '#sequential', ->
+    it 'should create an ArmManager', ->
+      machine = new Machine
+      expect(global.ArmManager.calledOnce).to.be true
+
+    it 'should create an ArmManager with two child arms', ->
+      machine = new Machine
+      expect(global.ArmManager.args[0][0]).to.be.an global.Arm
+      expect(global.ArmManager.args[0][1]).to.be.an global.Arm
+
+  describe '#sequential', ->
+    machine = null
+
+    beforeEach ->
+      machine = new Machine
+
+    afterEach ->
+      machine = null
 
     it 'should should be a method', ->
+      expect(machine.sequential).to.be.a Function
 
     it 'should return true if sequential', ->
+      expect(machine.sequential([1, 2, 3, 4])).to.be true
+      expect(machine.sequential([1, 2])).to.be true
+      expect(machine.sequential([1, 2, 10, 100, 1000, 5000])).to.be true
+      expect(machine.sequential([-100, 0, 100])).to.be true
+      expect(machine.sequential([-5, -7, -9, -10])).to.be true
+      expect(machine.sequential([-5, -4, -3, -1, 0, 4])).to.be true
+      expect(machine.sequential([0, 0, 0])).to.be true
+      expect(machine.sequential([.5, .6666667, .8])).to.be true
 
     it 'should return false if not sequential', ->
+      expect(machine.sequential([.5, 10, .8])).to.be false
+      expect(machine.sequential([0, -10, 100])).to.be false
+      expect(machine.sequential([.234, .222, .3456, 1234])).to.be false
 
   xdescribe '#draw', ->
-
     it 'should call draw on all rotors', ->
+      context = Symbol
+      machine = new Machine context
 
-    it 'should call draw on all pivots', ->
+      machine.draw()
 
-    it 'should call draw on ArmManager', ->
+      expect()
 
-  xdescribe '#increment', ->
+    xit 'should call draw on all pivots', ->
 
-    it 'should call transform on all rotors', ->
+    xit 'should call draw on ArmManager', ->
 
-    it 'should call transform on all pivots', ->
+  describe '#increment', ->
 
-    it 'should call updateAll on ArmManager', ->
+    xit 'should call transform on all rotors', ->
+
+    xit 'should call transform on all pivots', ->
+
+    xit 'should call updateAll on ArmManager', ->
+
+  describe '#on', ->
+    it 'should queue events', ->
+      machine = new Machine
+      machine.on('foo')
+      expect(machine.events.foo).to.be.an Array
+
+  describe '#trigger', ->
+    it 'should call all queued events', ->
+      machine = new Machine
+      noop = () -> {}
+      spy = sinon.spy(noop)
+
+      machine.on 'foo', spy
+      machine.trigger('foo')
+
+      expect(spy.calledOnce).to.be true
+
+    it 'should call with passed data', ->
+      machine = new Machine
+      noop = () -> {}
+      spy = sinon.spy(noop)
+
+      machine.on 'foo', spy
+      machine.trigger('foo', '😎')
+
+      expect(spy.args[0][0]).to.equal '😎'
+      
 
 
 ###

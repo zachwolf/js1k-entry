@@ -44,3 +44,13 @@ Arm.prototype.transform = function () {
 
   return this
 }
+
+/**
+ * Gets the radians from 0 to the given end point
+ * @param  {[type]} endPoint [description]
+ * @return {[type]}          [description]
+ */
+Arm.prototype.updateRadians = function (endPoint) {
+  // debugger
+  return this
+}

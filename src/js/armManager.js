@@ -1,7 +1,3 @@
-function getAngle (startPoint, endPoint) {
-  return Math.random()
-}
-
 /**
  * ArmManagers serves as a way to have multiple separate arms
  * that don't have to be aware of eachother
@@ -82,16 +78,12 @@ ArmManager.prototype.updateAll = function () {
   // to find intersecting points...
   var points = this.getIntersects()
 
-  // todo: find actual point on the canvas
   if (points) {
-    console.log(points)
+    // todo: find actual point on the canvas
     var point = points[1]
 
-    this.armA.angle = getAngle([this.armA.x, this.armA.y], point)
-    this.armB.angle = getAngle([this.armB.x, this.armB.y], point)
-
-    this.armA.transform()
-    this.armB.transform()
+    this.armA.updateRadians(point).transform()
+    this.armB.updateRadians(point).transform()
   } else {
     console.log('no possible points with current settings')
   }

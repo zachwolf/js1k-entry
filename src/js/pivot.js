@@ -19,6 +19,8 @@ Pivot.prototype.initialize = function(rotor, radians, fromCenter) {
   this.radians = radians
   this.fromCenter = fromCenter
 
+  this.transform()
+
   return this
 }
 

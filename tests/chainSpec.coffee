@@ -18,7 +18,6 @@ describe 'Chain', () ->
       done()
 
   # tests!
-
   describe '#initialize', ->
     it 'should call original methods', ->
       spy = sinon.spy noop

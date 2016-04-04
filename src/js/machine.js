@@ -9,6 +9,9 @@ function Machine () {
  * @return {Machine} self reference
  */
 Machine.prototype.initialize = function(cntx) {
+  // holder for pub/sub events
+  this.events = {}
+
   this.cntx = cntx
 
   // rotors
@@ -18,7 +21,6 @@ Machine.prototype.initialize = function(cntx) {
 
   // pivots
   this.pivotA = new Pivot(this.rotorA, 0, 40) // rotar, start degrees, offset from center
-  // this.pivotB = new Pivot(this.rotorB, (Math.PI * 2) * .5, 75) // rotar, start degrees, offset from center
   this.pivotB = new Pivot(this.rotorB, 0, 40) // rotar, start degrees, offset from center
 
   // arms
@@ -28,6 +30,7 @@ Machine.prototype.initialize = function(cntx) {
   this.armManager = new ArmManager(armA, armB)
 
   // this.stage = new Stage()
+  this.trigger('start')
 
   return this
 }
@@ -78,7 +81,6 @@ Machine.prototype.draw = function() {
 }
 
 Machine.prototype.increment = function () {
-
   this.rotorA.transform()
   this.rotorB.transform()
 
@@ -86,6 +88,38 @@ Machine.prototype.increment = function () {
   this.pivotB.transform()
 
   this.armManager.updateAll()
+
+  return this
+}
+
+/**
+ * Subscribe to Machine events
+ * @param  {string}   eventName event to be called
+ * @param  {Function} callback  event callback
+ * @return {Machine}            self reference
+ */
+Machine.prototype.on = function (eventName, callback) {
+  if (this.events[eventName]) {
+    this.events[eventName].push(callback)
+  } else {
+    this.events[eventName] = [callback]
+  }
+
+  return this
+}
+
+/**
+ * Publish Machine events
+ * @param  {String} eventName event to be triggered
+ * @param  {*} data           optional data to pass to the callback
+ * @return {Machine}          self references
+ */
+Machine.prototype.trigger = function (eventName, data) {
+  if (this.events[eventName]) {
+    this.events[eventName].forEach(function (cb) {
+      cb(data)
+    })
+  }
 
   return this
 }
