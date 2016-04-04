@@ -37,5 +37,8 @@
     "sinon": "^1.17.3",
     "sinon-expect": "^0.2.0",
     "through2": "^2.0.1"
+  },
+  "dependencies": {
+    "nodemon": "^1.9.1"
   }
 }
