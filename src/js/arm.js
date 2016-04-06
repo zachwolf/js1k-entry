@@ -51,6 +51,29 @@ Arm.prototype.transform = function () {
  * @return {[type]}          [description]
  */
 Arm.prototype.updateRadians = function (endPoint) {
-  // debugger
+  var cx = this.pivot.x
+    , cy = this.pivot.y
+    , px = endPoint[0]
+    , py = endPoint[1]
+    , opposite = Math.abs(cy - py)
+    , adjacent = Math.abs(cx - px)
+    , res
+
+  if (py >= cy) { // below center point
+    if (px >= cx) { // right of center point
+      res = Math.atan(opposite / adjacent)
+    } else { // left of center point
+      res = Math.PI - Math.atan(opposite / adjacent)
+    }
+  } else { // above center point
+    if (px >= cx) { // right of center point
+      res = Math.PI * 1.5 + Math.asin(opposite / adjacent)
+    } else { // left of center point
+      res = Math.PI + Math.sin(opposite / adjacent)
+    }
+  }
+
+  this.angle = res
+
   return this
 }

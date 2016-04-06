@@ -29,8 +29,13 @@ Machine.prototype.initialize = function(cntx) {
 
   this.armManager = new ArmManager(armA, armB)
 
+  var self = this
+
+  this.on('start', function () {
+    self.armManager.updateAll()
+  })
+
   // this.stage = new Stage()
-  this.trigger('start')
 
   return this
 }

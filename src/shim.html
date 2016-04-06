@@ -31,14 +31,47 @@
 </script>
 
 <script src="/js/util.js"></script>
+<script src="/js/chain.js"></script>
 <script src="/js/machine.js"></script>
 <script src="/js/singletonFactory.js"></script>
+<script src="/js/app.js"></script>
 <script src="/js/rotor.js"></script>
 <script src="/js/pivot.js"></script>
 <script src="/js/arm.js"></script>
 <script src="/js/armManager.js"></script>
-<script src="/js/chain.js"></script>
-<script src="/js/app.js"></script>
+
+<script>
+	App()
+		.on('start', function () {
+			var limit = 500
+
+			function draw() {
+			  if (!limit--) {
+			    return
+			  }
+
+			  App().cntx
+			    .set('fillStyle', '#fff')
+			    .rect(0, 0, a.clientWidth, a.clientHeight)
+			    .fill()
+
+			  App()
+			    .increment()
+			    .draw()
+			    
+			  requestAnimationFrame(draw)
+			}
+
+			document.body.addEventListener('click', function () {
+				limit = 5
+				draw()
+			})
+
+			requestAnimationFrame(draw)
+		})
+		.trigger('start')
+
+</script>
 
 </body>
 </html>

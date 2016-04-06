@@ -19,8 +19,6 @@ ArmManager.prototype.initialize = function (armA, armB) {
   this.armA = armA
   this.armB = armB
 
-  this.updateAll()
-
   return this
 }
 
