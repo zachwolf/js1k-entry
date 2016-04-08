@@ -4,7 +4,7 @@ expect = require('sinon-expect')
 
 shim   = require('./helpers/vanillaShim')
 
-describe 'Rotor', () ->
+describe 'Rotor', ->
   Rotor = null
 
   before (done) ->
@@ -16,79 +16,71 @@ describe 'Rotor', () ->
       done()
 
   describe '#initialize', ->
-    it 'should do something', ->
-      expect(true).to.be(true)
+    initSpy = null
 
+    beforeEach ->
+      initSpy = sinon.spy(Rotor.prototype, 'initialize')
+      
+    afterEach ->
+      initSpy = null
+      Rotor.prototype.initialize.restore()
 
-###
+    it 'should be called immediately', ->
+      rotor = new Rotor()
+      expect(initSpy.calledOnce).to.be true
 
-describe('Rotor', function () {
-  describe('#initialize', function () {
-    it('should be called immediately', function () {
-      var spy = sinon.spy(Rotor.prototype, 'initialize')
-      var rotor = new Rotor()
+    it 'should be called with constructor parameters', ->
+      x = '😀'
+      y = '😁'
+      r = '😂'
+      s = '😾'
+      rotor = new Rotor(x, y, r, s)
+      expect(initSpy.args[0][0]).to.equal x
+      expect(initSpy.args[0][1]).to.equal y
+      expect(initSpy.args[0][2]).to.equal r
+      expect(initSpy.args[0][3]).to.equal s
 
-      sExpect(spy).was.called()
-    })
+    it 'should set initial value from passed parameters', ->
+      x = '😀'
+      y = '😁'
+      r = '😂'
+      s = '😾'
+      rotor = new Rotor(x, y, r, s)
+      expect(rotor.x).to.equal x
+      expect(rotor.y).to.equal y
+      expect(rotor.radius).to.equal r
+      expect(rotor.speed).to.equal s
 
-    it('should save passed parameters', function () {
-      var config = {
-        x: 100,
-        y: 200,
-        r: 300
-      }
-      var rotor = new Rotor(config.x, config.y, config.r)
+    it 'should set initial rotation', ->
+      rotor = new Rotor()
+      expect(rotor.rotation).to.not.be undefined
 
-      expect(rotor.x).to.equal(config.x)
-      expect(rotor.y).to.equal(config.y)
-      expect(rotor.radius).to.equal(config.r)
-    })
+  describe '#transform', ->
 
-    it('should return itsself', function () {
-      expect(new Rotor() instanceof Rotor).to.be(true)
-    })
-  })
+    before ->
+      global.getFPS = (cb) ->
+        cb(100)
 
-  describe('#draw', function () {
-    it('draw itsself to the passed context', function () {
-      var x = 1
-        , y = 2
-        , r = 3
-        , rotor = new Rotor(x, y, r)
-        , spy = sinon.spy(contextStub, 'arc')
+    after ->
+      delete global.getFPS
 
-      rotor.draw(contextStub)
+    it 'should increment the rotor\'s rotation', ->
+      rotor = new Rotor(0, 0, 0, 100)
 
-      sExpect(spy).was.calledWith(1, 2, 3, 0, Math.PI * 2)
-
-      contextStub.arc.restore()
-    })
-  })
-
-  describe('#transform', function () {
-    it('should increment the rotors rotation', function () {
-      var rotor = new Rotor(0, 0, 0, 100)
-        , rotorVal = rotor.rotation
+      prevRotation = rotor.rotation
 
       rotor.transform()
 
-      expect(rotorVal).to.not.equal(rotor.rotation)
-    })
+      expect(rotor.rotation).to.not.equal prevRotation
 
-    it('should calculate distance based on passed speed', function () {
-      function round (num) {
-        return Math.round(num * 100) / 100
-      }
+    it 'should calculate distance based on passed speed', ->
+      round = (val) ->
+        Math.round(val * 10000)
 
-      var rotorA = new Rotor(0, 0, 0, 1000)
-        , rotorB = new Rotor(0, 0, 0, 2000)
+      rotorA = new Rotor(0, 0, 0, 1000)
+      rotorB = new Rotor(0, 0, 0, 2000)
 
       rotorA.transform()
       rotorB.transform()
 
-      expect(round(rotorB.rotation)).to.equal(round(rotorA.rotation) / 2)
-    })
-  })
-})
-
-###
+      expect(round(rotorA.rotation)).to.equal round(rotorB.rotation) * 2
